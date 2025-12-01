@@ -21,7 +21,7 @@ export function setModel(newModel: string) {
 
 export const bot = new TelegramBot({botToken: Environment.BOT_TOKEN, testEnvironment: Environment.TEST_ENVIRONMENT});
 export const ollama = new Ollama({
-    host: Environment.OLLAMA_HOST,
+    host: Environment.OLLAMA_ADDRESS,
     headers: {'Authorization': `Bearer ${Environment.OLLAMA_API_KEY}`}
 });
 
@@ -48,7 +48,11 @@ bot.on('message:text', async (message) => {
     console.log('message', message);
 
     if (message.chat.type === 'private' && !Environment.ADMIN_IDS.includes(message.chat.id)) return;
-    await findAndExecuteChatCommand(chatCommands, message);
+    if (!await findAndExecuteChatCommand(chatCommands, message)) {
+        const chat = chatCommands.find(e => e instanceof OllamaChat);
+        if (!chat || !message.text) return;
+        await chat.executeOllama(message, message.text);
+    }
 });
 
 bot.on('inline_query', async (query) => {

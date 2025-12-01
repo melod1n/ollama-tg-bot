@@ -22,10 +22,16 @@ export class OllamaChat extends ChatCommand {
 
     async execute(msg: Message, match?: RegExpExecArray | null): Promise<void> {
         console.log('match', match);
+        return this.executeOllama(msg, match?.[1]!);
+    }
+
+    async executeOllama(msg: Message, text: string): Promise<void> {
         const chatId = msg.chat.id;
 
+        let waitMessage: Message;
+
         try {
-            const wait = await bot.sendMessage({
+            waitMessage = await bot.sendMessage({
                 chat_id: chatId,
                 text: waitText,
                 reply_parameters: {
@@ -45,7 +51,7 @@ export class OllamaChat extends ChatCommand {
                     },
                     {
                         role: 'user',
-                        content: match?.[1]!
+                        content: text
                     }
                 ]
             });
@@ -55,8 +61,8 @@ export class OllamaChat extends ChatCommand {
 
             const interval = setInterval(async () => {
                 console.log('messageText', messageText);
-
-                await send(chatId, wait.message_id, messageText);
+                console.log('ended', ended);
+                await send(chatId, waitMessage.message_id, messageText);
                 if (ended) {
                     clearInterval(interval);
                 }
@@ -69,17 +75,19 @@ export class OllamaChat extends ChatCommand {
                     console.log('messageText', messageText);
                     ended = true;
                     clearInterval(interval);
-                    await send(chatId, wait.message_id, messageText);
+                    await send(chatId, waitMessage.message_id, messageText);
                 }
             }
         } catch (error) {
             console.error(error);
+            await send(chatId, waitMessage.message_id, `Произошла ошибка!\n${error.toString()}`);
         }
         return Promise.resolve();
     }
 }
 
 export async function send(chatId: number, messageId: number, messageText: string): Promise<void> {
+    if (messageText.trim().length === 0) return Promise.resolve();
     return new Promise(async (resolve, reject) => {
         try {
             await bot.editMessageText({
