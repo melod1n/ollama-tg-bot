@@ -10,6 +10,7 @@ import {SetModel} from "./chat-commands/set-model";
 import {GetModel} from "./chat-commands/get-model";
 import {findAndExecuteChatCommand} from "./util/utils";
 import {WebSearchResponse} from "./model/web-search-response";
+import {ListModels} from "./chat-commands/list-models";
 
 Environment.load();
 
@@ -31,6 +32,7 @@ const chatCommands: ChatCommand[] = [
     new OllamaSearch(),
     new SetModel(),
     new GetModel(),
+    new ListModels(),
     new Ping()
 ];
 
