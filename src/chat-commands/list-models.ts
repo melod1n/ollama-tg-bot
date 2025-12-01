@@ -8,8 +8,13 @@ export class ListModels extends ChatCommand {
     async execute(msg: Message, _match?: RegExpExecArray | null): Promise<void> {
         try {
             const listResponse = await ollama.list();
-            const message = 'Доступные модели:\n\n' +
-                listResponse.models.map(e => `\`${e.model}\``).join("\n");
+
+            const modelsString = listResponse.models
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(e => `\`${e.model}\``)
+                .join("\n");
+
+            const message = 'Доступные модели:\n\n' + modelsString;
 
             await bot.sendMessage(
                 {
