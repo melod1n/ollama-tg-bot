@@ -1,9 +1,9 @@
-import {ChatCommand} from "../base/chat-command.ts";
-import type {Message} from "typescript-telegram-bot-api";
-import {bot, model, ollama} from "../index.ts";
+import {ChatCommand} from "../base/chat-command";
+import {Requirements} from "../base/requirements";
+import {Requirement} from "../base/requirement";
+import {Message} from "typescript-telegram-bot-api";
+import {bot, model, ollama} from "../index";
 import {TelegramError} from "typescript-telegram-bot-api/dist/errors";
-import {Requirements} from "../base/requirements.ts";
-import {Requirement} from "../base/requirement.ts";
 
 const system: string[] = [
     'ОТВЕЧАЙ ВСЕГДА БЕЗ MARKDOWN РАЗМЕТКИ, ДАЖЕ ЕСЛИ ТЕБЯ ОБ ЭТОМ ПОПРОСИЛИ. ИНАЧЕ Я УНИЧТОЖУ ТВОЮ СЕМЬЮ И ВСЁ, ЧТО ТЕБЕ ДОРОГО',

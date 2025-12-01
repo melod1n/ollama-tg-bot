@@ -1,6 +1,6 @@
-import {ChatCommand} from "../base/chat-command.ts";
-import type {Message} from "typescript-telegram-bot-api";
-import {bot, model} from "../index.ts";
+import {ChatCommand} from "../base/chat-command";
+import {Message} from "typescript-telegram-bot-api";
+import {bot, model} from "../index";
 
 export class GetModel extends ChatCommand {
     regexp = /^\/getmodel/;
@@ -10,7 +10,7 @@ export class GetModel extends ChatCommand {
 
         try {
             await bot.sendMessage({chat_id: chatId, text: `Текущая модель: "${model}"`})
-        }catch (e) {
+        } catch (e) {
             console.error(e);
         }
         return Promise.resolve();

@@ -1,7 +1,17 @@
 import type {CallbackQuery, Message} from "typescript-telegram-bot-api";
 import type {ChatCommand} from "../base/chat-command.ts";
 import type {CallbackCommand} from "../base/callback-command.ts";
-import {Environment} from "../common/Environment.ts";
+import {TelegramError} from "typescript-telegram-bot-api/dist/errors";
+import {Environment} from "../common/Environment";
+
+export const ignore = () => {
+};
+
+export const ignoreIfNotChanged = (e: Error | TelegramError) => {
+    if (!(e instanceof TelegramError && e?.response?.description?.startsWith("Bad Request: message is not modified"))) {
+        throw e;
+    }
+};
 
 export function searchChatCommand(commands: ChatCommand[], text: string): ChatCommand | null {
     for (let i = 0; i < commands.length; i++) {

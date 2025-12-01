@@ -1,7 +1,7 @@
-import {ChatCommand} from "../base/chat-command.ts";
-import type {Message} from "typescript-telegram-bot-api";
-import {Environment} from "../common/Environment.ts";
-import {bot, setModel} from "../index.ts";
+import {ChatCommand} from "../base/chat-command";
+import {Environment} from "../common/Environment";
+import {Message} from "typescript-telegram-bot-api";
+import {bot, setModel} from "../index";
 
 export class SetModel extends ChatCommand {
     regexp = /^\/setmodel\s([^]+)/;

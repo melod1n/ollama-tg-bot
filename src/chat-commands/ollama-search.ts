@@ -1,9 +1,10 @@
-import {ChatCommand} from "../base/chat-command.ts";
-import type {Message} from "typescript-telegram-bot-api";
-import {bot, ollama} from "../index.ts";
-import {send, waitText} from "./ollama-chat.ts";
-import {Requirements} from "../base/requirements.ts";
-import {Requirement} from "../base/requirement.ts";
+import {ChatCommand} from "../base/chat-command";
+import {Requirements} from "../base/requirements";
+import {Requirement} from "../base/requirement";
+import {Message} from "typescript-telegram-bot-api";
+import {bot, ollama} from "../index";
+import {send, waitText} from "./ollama-chat";
+import {WebSearchResponse} from "../model/web-search-response";
 
 export class OllamaSearch extends ChatCommand {
     regexp = /^\/s\s([^]+)/;
@@ -27,11 +28,11 @@ export class OllamaSearch extends ChatCommand {
 
             const results = await ollama.webSearch({query: match?.[1]!});
             console.log('results', results);
-            // const message = `Результаты:\n\n${results.results.map((r, i) => `${i + 1}. (${r.url})[${r.title}]\n`)}`;
 
             let message = 'Результаты:\n\n';
             results.results.forEach((result, index) => {
-                message += `${index+1}. ${result.url}\n`;
+                const r = result as WebSearchResponse;
+                message += `${index + 1}. ${r.url}\n`;
             });
 
             await send(chatId, wait.message_id, message);
