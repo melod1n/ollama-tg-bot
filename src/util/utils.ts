@@ -3,6 +3,7 @@ import type {ChatCommand} from "../base/chat-command.ts";
 import type {CallbackCommand} from "../base/callback-command.ts";
 import {TelegramError} from "typescript-telegram-bot-api/dist/errors";
 import {Environment} from "../common/Environment";
+import {bot} from "../index";
 
 export const ignore = () => {
 };
@@ -74,4 +75,35 @@ export async function findAndExecuteCallbackCommand(commands: CallbackCommand[],
     await command.answerCallbackQuery(query);
     await command.afterExecute(query);
     return true;
+}
+
+export async function editMessageText(chatId: number, messageId: number, messageText: string): Promise<void> {
+    if (messageText.trim().length === 0) return Promise.resolve();
+    return new Promise(async (resolve, reject) => {
+        try {
+            await bot.editMessageText({
+                chat_id: chatId,
+                message_id: messageId,
+                text: messageText,
+                // parse_mode: "Markdown",
+                link_preview_options: {
+                    is_disabled: true
+                }
+            });
+            resolve();
+        } catch (e) {
+            console.error(e);
+
+            if (e instanceof TelegramError && e.response.description.includes('Too Many Requests')) {
+                const delay = Number(e.message.split('retry after ')[1]) || 30;
+                setTimeout(() => {
+                    resolve();
+                }, delay * 1000);
+            } else if (e instanceof TelegramError && e.response.description.includes('MESSAGE_TOO_LONG')) {
+                reject(e);
+            } else {
+                resolve();
+            }
+        }
+    });
 }

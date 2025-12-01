@@ -6,6 +6,7 @@ export class Environment {
     static OLLAMA_API_KEY?: string;
     static ADMIN_IDS: number[];
     static BOT_PREFIX: string;
+    static SYSTEM_PROMPT: string;
 
     static load() {
         Environment.BOT_TOKEN = process.env.BOT_TOKEN || '';
@@ -15,5 +16,6 @@ export class Environment {
         Environment.OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
         Environment.ADMIN_IDS = (process.env.ADMIN_IDS || '').split(",").map(e => parseInt(e.trim(), 10));
         Environment.BOT_PREFIX = process.env.BOT_PREFIX || '';
+        Environment.SYSTEM_PROMPT = (process.env.SYSTEM_PROMPT?.trim()) || '';
     }
 }

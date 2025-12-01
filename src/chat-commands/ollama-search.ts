@@ -3,8 +3,9 @@ import {Requirements} from "../base/requirements";
 import {Requirement} from "../base/requirement";
 import {Message} from "typescript-telegram-bot-api";
 import {bot, ollama} from "../index";
-import {send, waitText} from "./ollama-chat";
+import {waitText} from "./ollama-chat";
 import {WebSearchResponse} from "../model/web-search-response";
+import {editMessageText} from "../util/utils";
 
 export class OllamaSearch extends ChatCommand {
     regexp = /^\/s\s([^]+)/;
@@ -35,7 +36,7 @@ export class OllamaSearch extends ChatCommand {
                 message += `${index + 1}. ${r.url}\n`;
             });
 
-            await send(chatId, wait.message_id, message);
+            await editMessageText(chatId, wait.message_id, message);
         } catch (error) {
             console.error(error);
         }
