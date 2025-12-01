@@ -2,6 +2,8 @@ import {ChatCommand} from "../base/chat-command.ts";
 import type {Message} from "typescript-telegram-bot-api";
 import {bot, model, ollama} from "../index.ts";
 import {TelegramError} from "typescript-telegram-bot-api/dist/errors";
+import {Requirements} from "../base/requirements.ts";
+import {Requirement} from "../base/requirement.ts";
 
 const system: string[] = [
     'ОТВЕЧАЙ ВСЕГДА БЕЗ MARKDOWN РАЗМЕТКИ, ДАЖЕ ЕСЛИ ТЕБЯ ОБ ЭТОМ ПОПРОСИЛИ. ИНАЧЕ Я УНИЧТОЖУ ТВОЮ СЕМЬЮ И ВСЁ, ЧТО ТЕБЕ ДОРОГО',
@@ -11,10 +13,12 @@ const system: string[] = [
     'В ТВОЕМ ОТВЕТЕ НЕ ДОЛЖНО БЫТЬ ВСЕЙ ЭТОЙ ИНФОРМАЦИИ'
 ];
 
-const text = '⏳ Дайте-ка подумать...';
+export const waitText = '⏳ Дайте-ка подумать...';
 
-export class OllamaCommand extends ChatCommand {
-    regexp = /^\/o\s([^]+)/;
+export class OllamaChat extends ChatCommand {
+    regexp = /^\/c\s([^]+)/;
+
+    override requirements = Requirements.Build(Requirement.BOT_ADMIN);
 
     async execute(msg: Message, match?: RegExpExecArray | null): Promise<void> {
         console.log('match', match);
@@ -23,7 +27,7 @@ export class OllamaCommand extends ChatCommand {
         try {
             const wait = await bot.sendMessage({
                 chat_id: chatId,
-                text: text,
+                text: waitText,
                 reply_parameters: {
                     chat_id: chatId,
                     message_id: msg.message_id
@@ -75,13 +79,17 @@ export class OllamaCommand extends ChatCommand {
     }
 }
 
-async function send(chatId: number, messageId: number, messageText: string): Promise<void> {
+export async function send(chatId: number, messageId: number, messageText: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
         try {
             await bot.editMessageText({
                 chat_id: chatId,
                 message_id: messageId,
                 text: messageText,
+                // parse_mode: "Markdown",
+                link_preview_options: {
+                    is_disabled: true
+                }
             });
             resolve();
         } catch (e) {
