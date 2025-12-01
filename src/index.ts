@@ -1,6 +1,6 @@
 import "dotenv/config";
 import {Ollama} from "ollama";
-import {InlineQueryResult, TelegramBot} from "typescript-telegram-bot-api";
+import {InlineQueryResult, TelegramBot, User} from "typescript-telegram-bot-api";
 import {Ping} from "./chat-commands/ping";
 import {ChatCommand} from "./base/chat-command";
 import {Environment} from "./common/Environment";
@@ -20,6 +20,7 @@ export function setModel(newModel: string) {
 }
 
 export const bot = new TelegramBot({botToken: Environment.BOT_TOKEN, testEnvironment: Environment.TEST_ENVIRONMENT});
+export let botUser: User;
 export const ollama = new Ollama({
     host: Environment.OLLAMA_ADDRESS,
     headers: {'Authorization': `Bearer ${Environment.OLLAMA_API_KEY}`}
@@ -35,7 +36,8 @@ const chatCommands: ChatCommand[] = [
 
 async function main() {
     try {
-        await bot.startPolling();
+        const results = await Promise.all([bot.getMe(), bot.startPolling()]);
+        botUser = results[0];
     } catch (error) {
         console.error(error);
         return;
@@ -49,9 +51,26 @@ bot.on('message:text', async (message) => {
 
     if (message.chat.type === 'private' && !Environment.ADMIN_IDS.includes(message.chat.id)) return;
     if (!await findAndExecuteChatCommand(chatCommands, message)) {
+        const startsWithPrefix = message.text.startsWith(`${Environment.BOT_PREFIX}`);
+
+        const messageWithoutPrefix = message.text.split(Environment.BOT_PREFIX)[1];
+
+        if (startsWithPrefix && (!messageWithoutPrefix || messageWithoutPrefix.trim().length === 0)) {
+            await bot.sendMessage({
+                chat_id: message.chat.id,
+                text: "шо",
+                reply_parameters: {
+                    message_id: message.message_id
+                }
+            });
+            return;
+        }
+
+        if (message.chat.type !== 'private' && !startsWithPrefix) return;
+
         const chat = chatCommands.find(e => e instanceof OllamaChat);
         if (!chat || !message.text) return;
-        await chat.executeOllama(message, message.text);
+        await chat.executeOllama(message, startsWithPrefix ? message.text.split(Environment.BOT_PREFIX)[1] : message.text);
     }
 });
 

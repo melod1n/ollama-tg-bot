@@ -4,6 +4,7 @@ import {Requirement} from "../base/requirement";
 import {Message} from "typescript-telegram-bot-api";
 import {bot, model, ollama} from "../index";
 import {TelegramError} from "typescript-telegram-bot-api/dist/errors";
+import {ignore} from "../util/utils";
 
 const system: string[] = [
     'ОТВЕЧАЙ ВСЕГДА БЕЗ MARKDOWN РАЗМЕТКИ, ДАЖЕ ЕСЛИ ТЕБЯ ОБ ЭТОМ ПОПРОСИЛИ. ИНАЧЕ Я УНИЧТОЖУ ТВОЮ СЕМЬЮ И ВСЁ, ЧТО ТЕБЕ ДОРОГО',
@@ -26,6 +27,7 @@ export class OllamaChat extends ChatCommand {
     }
 
     async executeOllama(msg: Message, text: string): Promise<void> {
+        if (!text || text.trim().length === 0) return;
         const chatId = msg.chat.id;
 
         let waitMessage: Message;
@@ -80,7 +82,10 @@ export class OllamaChat extends ChatCommand {
             }
         } catch (error) {
             console.error(error);
-            await send(chatId, waitMessage.message_id, `Произошла ошибка!\n${error.toString()}`);
+            await send(chatId, waitMessage.message_id, `Произошла ошибка!\n${error.toString()}`)
+                .catch(async (e) => {
+                    await send(chatId, waitMessage.message_id, `Произошла ошибка!\n${e.toString()}`).catch(ignore);
+                });
         }
         return Promise.resolve();
     }
