@@ -51,9 +51,9 @@ bot.on('message:text', async (message) => {
 
     if (message.chat.type === 'private' && !Environment.ADMIN_IDS.includes(message.chat.id)) return;
     if (!await findAndExecuteChatCommand(chatCommands, message)) {
-        const startsWithPrefix = message.text.startsWith(`${Environment.BOT_PREFIX}`);
+        const startsWithPrefix = message.text.toLowerCase().startsWith(Environment.BOT_PREFIX.toLowerCase());
 
-        const messageWithoutPrefix = message.text.split(Environment.BOT_PREFIX)[1];
+        const messageWithoutPrefix = message.text.substring(Environment.BOT_PREFIX.length + 1, message.text.length).trim();
 
         if (startsWithPrefix && (!messageWithoutPrefix || messageWithoutPrefix.trim().length === 0)) {
             await bot.sendMessage({
@@ -66,11 +66,11 @@ bot.on('message:text', async (message) => {
             return;
         }
 
-        if (message.chat.type !== 'private' && !startsWithPrefix) return;
+        if (!startsWithPrefix && message.chat.type !== 'private') return;
 
         const chat = chatCommands.find(e => e instanceof OllamaChat);
         if (!chat || !message.text) return;
-        await chat.executeOllama(message, startsWithPrefix ? message.text.split(Environment.BOT_PREFIX)[1] : message.text);
+        await chat.executeOllama(message, startsWithPrefix ? messageWithoutPrefix : message.text);
     }
 });
 
